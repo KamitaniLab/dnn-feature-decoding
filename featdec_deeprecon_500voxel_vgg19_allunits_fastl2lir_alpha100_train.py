@@ -142,6 +142,11 @@ for feat, sbj, roi in product(features_list, subjects_list, rois_list):
     if os.path.exists(info_file):
         with open(info_file, 'r') as f:
             info = yaml.load(f)
+        while info is None:
+            warnings.warn('Failed to load info from %s. Retrying...'
+                          % info_file)
+            with open(info_file, 'r') as f:
+                info = yaml.load(f)
         if '_status' in info and 'computation_status' in info['_status']:
             if info['_status']['computation_status'] == 'done':
                 print('%s is already done and skipped' % analysis_id)
@@ -190,7 +195,7 @@ for feat, sbj, roi in product(features_list, subjects_list, rois_list):
             try:
                 save_array(save_file, norm_param[sv], key=sv, dtype=np.float32, sparse=False)
                 print('Saved %s' % save_file)
-            except IOError:
+            except Exception:
                 warnings.warn('Failed to save %s. Possibly double running.' % save_file)
 
     # Preparing learning
